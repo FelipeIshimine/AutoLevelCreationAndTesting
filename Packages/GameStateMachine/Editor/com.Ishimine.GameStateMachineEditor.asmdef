@@ -1,0 +1,17 @@
+{
+    "name": "com.Ishimine.GameStateMachineEditor",
+    "references": [
+        "GUID:e3a3f27952c4d2247af7827a608f135f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

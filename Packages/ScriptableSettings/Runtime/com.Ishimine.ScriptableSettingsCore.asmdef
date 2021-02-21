@@ -1,0 +1,15 @@
+{
+    "name": "com.Ishimine.ScriptableSettingsCore",
+    "references": [
+        "com.ishimine.RuntimeScriptableSingleton"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d782f083ddf75db459b256b846d6746c, type: 3}
+  m_Name: TileContentSettings
+  m_EditorClassIdentifier: 
+  tabName: TileContent
+  empty: {r: 0.9056604, g: 0.9056604, b: 0.9056604, a: 0.4392157}
+  fill: {r: 1, g: 1, b: 1, a: 1}
+  prefabs:
+  - {fileID: 4339660316200295546, guid: 2533c7d45fb531743b6383016b1ce256, type: 3}
+  - {fileID: 4339660316200295546, guid: f93020ce31fa6514c801b4dbb792bebb, type: 3}
