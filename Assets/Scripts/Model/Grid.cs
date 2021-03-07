@@ -14,7 +14,12 @@ public class Grid
 
     public Tile this[Vector2Int coordinate]
     {
-        get => Tiles[coordinate.x, coordinate.y];
+        get
+        {
+            if (!IsValidCoordinate(coordinate))
+                Debug.LogError($"Coordenada invalida:{coordinate}");
+            return   Tiles[coordinate.x, coordinate.y];
+        }
         set => Tiles[coordinate.x, coordinate.y] = value;
     }
 

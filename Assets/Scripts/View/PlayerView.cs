@@ -46,12 +46,12 @@ public class PlayerView : MonoSingleton<PlayerView>
     private void _SetAtCoordinateWithAnimation(Vector2Int startPosition, Action callback)
     {
         transform.localScale = Vector3.zero;
-        this.PlayCoroutine(ref _routine, () => AppearAnimation(GridView.GetPositionFromCoordinate(startPosition), callback));
+        this.PlayCoroutine(ref _routine, () => AppearAnimation(GridView.GetActivePositionFromCoordinate(startPosition), callback));
     }
 
     private void _SetAtCoordinate(Vector2Int startPosition)
     {
-        transform.position = GridView.GetPositionFromCoordinate(startPosition);
+        transform.position = GridView.GetActivePositionFromCoordinate(startPosition);
     }
 
     #region Ienumerators
@@ -59,8 +59,8 @@ public class PlayerView : MonoSingleton<PlayerView>
     public IEnumerator DashAnimation(Vector2Int from, Vector2Int to, Action<float> onProgress, Action callback)
     {
         float t = 0;
-        Vector2 startPosition = GridView.GetPositionFromCoordinate(from);
-        Vector2 endPosition = GridView.GetPositionFromCoordinate(to);
+        Vector2 startPosition = GridView.GetActivePositionFromCoordinate(from);
+        Vector2 endPosition = GridView.GetActivePositionFromCoordinate(to);
 
         float duration = (Vector2.Distance(from, to) / speed);
         do

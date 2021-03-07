@@ -12,7 +12,7 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T>
 
     protected virtual void Awake()
     {
-        if(instance != null)
+        if(instance != null && instance != this)
         {
             Destroy(gameObject);
             throw new Exception($"Mono Singleton Instance Error {this}");

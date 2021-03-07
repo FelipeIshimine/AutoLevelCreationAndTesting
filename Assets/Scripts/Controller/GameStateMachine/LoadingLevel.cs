@@ -1,5 +1,6 @@
 ﻿using GameStateMachineCore;
 using System;
+using UnityEngine;
 
 internal class LoadingState : GameState<LoadingState>
 {
@@ -17,6 +18,7 @@ internal class LoadingState : GameState<LoadingState>
     public override void Enter()
     {
         base.Enter();
+        Debug.Log($"Loading level: {levelIndex}");
         if(!_useAnimation)
         {
             GridView.LoadLevel(levelIndex);

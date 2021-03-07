@@ -13,6 +13,15 @@ public class TileView : MonoBehaviourView<Tile>
         InstantiateContent();
         name = $"[{tile.Coordinate.x},{tile.Coordinate.y}]";
     }
+
+    internal void Initialize()
+    {
+        Model = null;
+        InstantiateContent();
+        //name = $"[{tile.Coordinate.x},{tile.Coordinate.y}]";
+    }
+
+
     public void InstantiateContent()
     {
         if(content!=null)
@@ -22,22 +31,25 @@ public class TileView : MonoBehaviourView<Tile>
             else
                 DestroyImmediate(content);
         }
-        if (Model.ContentId >= 0)
+
+        int contentID = (Model != null) ? Model.ContentId : 1;
+
+        if (contentID >= 0)
         {
-            content = Instantiate(settings.prefabs[Model.ContentId]);
+            content = Instantiate(settings.prefabs[contentID]);
             content.transform.SetParent(transform);
             content.transform.localPosition = Vector2.zero;
             render = content.GetComponentInChildren<SpriteRenderer>();
-            if(Model.ContentId == 0) render.color = Model.IsEmpty ? settings.empty : settings.fill;
+            if(contentID == 0) render.color =  Model.IsEmpty? settings.empty : settings.fill;
         }
     }
 
     public void Refresh()
     {
-        if(Model.IsFilled)
+        if (Model == null || Model.IsFilled)
             render.color = settings.fill;
         else if (Model.ContentId == 0) 
-            render.color = Model.IsEmpty ? settings.empty : settings.fill;
+            render.color = (Model != null && Model.IsEmpty) ? settings.empty : settings.fill;
     }
 }
     

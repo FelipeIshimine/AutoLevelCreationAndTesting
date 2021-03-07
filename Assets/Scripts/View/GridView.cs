@@ -15,13 +15,14 @@ public class GridView : MonoSingletonView<GridView, Grid>
 {
     public GameObject tilePrefab;
 
+    private TileView[,] _tiles;
 
-    public TileView[,] tiles;
+    public TileView[,] activeTiles;
 
 
-    
     //public List<TileView> activeTiles = new List<TileView>();
-    public List<TileView> tileViews = new List<TileView>();
+
+    private Vector2Int fullSize = new Vector2Int(20, 20);
 
     public Transform player;
     public static Transform Player => Instance.player;
@@ -29,6 +30,8 @@ public class GridView : MonoSingletonView<GridView, Grid>
     public static Vector2Int StartPosition => Instance.Model.StartPosition;
 
     private Vector2 _gridStartPosition;
+    private Vector2 _gridActiveStartPosition;
+    private Vector2Int _gridActiveStartCoordinate;
 
     [Range(0,1)]public float separationPercentage = 1;
     public float loadLevelAnimationDuration = 1;
@@ -48,26 +51,28 @@ public class GridView : MonoSingletonView<GridView, Grid>
     internal static void LoadLevelAnimated(int levelIndex, Action callback)
     {
         LoadLevel(levelIndex);
-
-        Instance.PlayCoroutine(ref Instance._routine, ()=> Instance.LoadLevelAnimation(callback));
+        StartLoadLevelAnimation(callback);
     }
+
+    [Button]
+    private static void StartLoadLevelAnimation(Action callback)=> Instance.PlayCoroutine(ref Instance._routine, () => Instance.LoadLevelAnimation(callback));
 
     IEnumerator LoadLevelAnimation(Action callback)
     {
         float t = 0;
 
-        float separation = separationPercentage * tiles.Length;
-        float fullSteps = (float)1 / ((float)tiles.Length + 1*separation);
+        float separation = separationPercentage * _tiles.Length;
+        float fullSteps = (float)1 / ((float)_tiles.Length + 1*separation);
 
         float individualStep = fullSteps * separation;
 
         float aux = 1 / loadLevelAnimationDuration;
 
-        Vector2[,] startPositions = new Vector2[tiles.GetLength(0), tiles.GetLength(1)];
+        Vector2[,] startPositions = new Vector2[_tiles.GetLength(0), _tiles.GetLength(1)];
 
         for (int x = 0; x < startPositions.GetLength(0); x++)
             for (int y = 0; y < startPositions.GetLength(1); y++)
-                startPositions[x, y] = (Vector2)tiles[x, y].transform.position - positionMultiplicator;
+                startPositions[x, y] = (Vector2)_tiles[x, y].transform.position - positionMultiplicator;
 
         int xLength = startPositions.GetLength(0);
         int yLength = startPositions.GetLength(1);
@@ -81,7 +86,7 @@ public class GridView : MonoSingletonView<GridView, Grid>
             for (int x = 0; x < startPositions.GetLength(0); x++)
                 for (int y = 0; y < startPositions.GetLength(1); y++)
                 {
-                    var item = tiles[x, y];
+                    var item = _tiles[x, y];
                     i++;
                     float nt = (t - i * fullSteps) / individualStep;
                     item.transform.localScale = sizeCurve.Evaluate(nt) * Vector3.one;
@@ -97,30 +102,36 @@ public class GridView : MonoSingletonView<GridView, Grid>
         callback?.Invoke();
     }
 
-    internal static Vector2 GetPositionFromCoordinate(Vector2Int from) => Instance._gridStartPosition + from;
+    internal static Vector2 GetActivePositionFromCoordinate(Vector2Int from) => Instance._gridActiveStartPosition + from;
 
     #region Initializers
+
+    [Button]
     public void Initialize(Vector2Int size, int defaultValue, Vector2Int startPosition)
     {
         Model = new Grid(size, defaultValue, startPosition);
         InitializeTiles();
+        InitializeActiveTiles();
     }
+
     public void Initialize(int[,] values, Vector2Int startPosition)
     {
         Model = new Grid(values, startPosition);
         InitializeTiles();
+        InitializeActiveTiles();
     }
 
     public void InitializeTiles()
     {
-        Clear();
-        tiles = new TileView[Model.Size.x, Model.Size.y];
+        ClearTiles();
 
-        _gridStartPosition = -((Vector2)Model.Size - Vector2Int.one) / 2;
+        _tiles = new TileView[fullSize.x, fullSize.y];
 
-        for (int x = 0; x < Model.Size.x; x++)
+        _gridStartPosition = -((Vector2)fullSize - Vector2Int.one) / 2;
+
+        for (int x = 0; x < fullSize.x; x++)
         {
-            for (int y = 0; y < Model.Size.y; y++)
+            for (int y = 0; y < fullSize.y; y++)
             {
                 GameObject go;
                 if (Application.isPlaying)
@@ -129,15 +140,36 @@ public class GridView : MonoSingletonView<GridView, Grid>
                     go = PrefabUtility.InstantiatePrefab(tilePrefab) as GameObject;
 
                 var tileView = go.GetComponent<TileView>();
-                tiles[x, y] = tileView;
-                this.tileViews.Add(tileView);
+                _tiles[x, y] = tileView;
 
-
-                tileView.Initialize(Model[x, y]);
+                tileView.Initialize();
                 tileView.transform.position = _gridStartPosition + new Vector2(x, y);
                 tileView.transform.SetParent(transform);
             }
         }
+    }
+
+    private void InitializeActiveTiles()
+    {
+        activeTiles = new TileView[Model.Size.x, Model.Size.y];
+
+        _gridActiveStartCoordinate = new Vector2Int(Mathf.FloorToInt((fullSize.x - Model.Size.x) / 2), Mathf.FloorToInt((fullSize.y - Model.Size.y) / 2));
+
+
+        for (int x = 0; x < Model.Size.x; x++)
+        {
+            for (int y = 0; y < Model.Size.y; y++)
+            {
+                var tileView = activeTiles[x, y] = _tiles[_gridActiveStartCoordinate.x + x, _gridActiveStartCoordinate.y + y];
+
+                tileView.Initialize(Model[x, y]);
+                //tileView.transform.position = _gridStartPosition + new Vector2(x, y);
+                tileView.transform.SetParent(transform);
+            }
+        }
+
+        _gridActiveStartPosition = _tiles[_gridActiveStartCoordinate.x, _gridActiveStartCoordinate.y].transform.position;
+
     }
 
     #endregion
@@ -182,7 +214,7 @@ public class GridView : MonoSingletonView<GridView, Grid>
 
     internal static void RefreshTileView(Vector2Int playerCoordinate)
     {
-        Instance.tiles[playerCoordinate.x, playerCoordinate.y].Refresh();
+        Instance.activeTiles[playerCoordinate.x, playerCoordinate.y].Refresh();
     }
 
     [Button]
@@ -270,6 +302,7 @@ public class GridView : MonoSingletonView<GridView, Grid>
                 if (cancel)
                 {
                     Debug.Log($"{i}: <color=red> Canceled </color>");
+                    yield return null;
                     continue;
                 }
 
@@ -283,9 +316,10 @@ public class GridView : MonoSingletonView<GridView, Grid>
                     GameplayState.Instance.GoToLevel(i);
                     yield return ResolveRoutine(solution, null);
                 }
-                else yield return null;
             }
-            Debug.Log($"{i}/{LevelCreationManager.LevelsCount}");
+
+            Debug.Log($"{i+1}/{LevelCreationManager.LevelsCount}");
+            yield return null;
         }
 
         AssetDatabase.SaveAssets();
@@ -326,7 +360,6 @@ public class GridView : MonoSingletonView<GridView, Grid>
         Debug.Log("COMPLETED");
     }
 
-
     [Button]
     public void CreateReverseRandomLevelAndSave(int x = 6, int y = 6, int maxMoves = 100, int count = 1)
     {
@@ -356,24 +389,28 @@ public class GridView : MonoSingletonView<GridView, Grid>
         Model = new Grid(0, 0, 0, Vector2Int.zero);
         Model.Load(LevelCreationManager.Get(index));
         InitializeTiles();
+        InitializeActiveTiles();
     }
 
     public void UpdateTile(Vector2Int coordinate, int value)
     {
         Model[coordinate].ContentId = value;
-        tiles[coordinate.x, coordinate.y].InstantiateContent();
+        _tiles[coordinate.x, coordinate.y].InstantiateContent();
     }
 
-    public void Clear()
+    public void ClearTiles()
     {
-        for (int i = 0; i < tileViews.Count; i++)
+        if (_tiles == null) return;
+        for (int x = 0; x < fullSize.x; x++)
         {
-            if (Application.isPlaying)
-                Destroy(tileViews[i].gameObject);
-            else
-                DestroyImmediate(tileViews[i].gameObject);
+            for (int y = 0; y < fullSize.y; y++)
+            {
+                if (Application.isPlaying)
+                    Destroy(_tiles[x,y].gameObject);
+                else
+                    DestroyImmediate(_tiles[x,y].gameObject);
+            }
         }
-        tileViews.Clear();
     }
 
     internal static void LoadLevel(int levelIndex) => Instance.LoadFromManager(levelIndex);

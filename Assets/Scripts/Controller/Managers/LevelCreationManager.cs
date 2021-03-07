@@ -12,6 +12,14 @@ public class LevelCreationManager : RuntimeScriptableSingleton<LevelCreationMana
 
     public List<Level> discardedLevels = new List<Level>();
 
+
+    [Button]
+    public void OptimizeSizeOfAll()
+    {
+        foreach (var item in levels)
+            item.RemoveExcess();
+    }
+
     [Button]
     public void DiscardLevelsWithoutSolution()
     {

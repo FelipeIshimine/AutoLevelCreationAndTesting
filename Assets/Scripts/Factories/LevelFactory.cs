@@ -17,7 +17,6 @@ public static class LevelFactory
 
     public static int[,] CreateWithBacktracking(Vector2Int size, int maxMoves, Vector2Int startPosition, out List<Vector2Int> moves)
     {
-        Debug.Log($"StartPosition:{startPosition}");
         int[,] values = new int[size.x, size.y];
         for (int x = 0; x < size.x; x++)
             for (int y = 0; y < size.y; y++)
